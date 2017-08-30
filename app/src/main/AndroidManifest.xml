@@ -3,7 +3,7 @@
           package="com.example.android.lagos_java_developers">
 
 
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
         android:allowBackup="true"
@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.example.android.lagos_java_developers.activity.ListOfDevActivity">
+        <activity android:name="com.example.android.lagos_java_developers.activity.DevListActivity">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

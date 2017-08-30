@@ -23,4 +23,8 @@
         <item name="android:textColor">#ffffff</item>
     </style>
 
-    </resources>
+    <style name="TitleTex" parent="@style/TextAppearance.AppCompat">
+
+    </style>
+
+</resources>

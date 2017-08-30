@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.example.android.lagos_java_developers.R;
 import com.example.android.lagos_java_developers.model.DevProfile;
-import com.example.android.lagos_java_developers.utils.DeveloperProfile;
+import com.example.android.lagos_java_developers.utils.DevProfileUtil;
 import com.squareup.picasso.Picasso;
 
 
@@ -40,7 +40,7 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
 
-        if (ListOfDevActivity.isNetworkStatusAvialable(getApplicationContext())) {
+        if (DevListActivity.isNetworkStatusAvialable(getApplicationContext())) {
 
             getSupportLoaderManager().initLoader(0, null, this);
 
@@ -75,7 +75,7 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),ListOfDevActivity.class));
+                startActivity(new Intent(getApplicationContext(), DevListActivity.class));
             }
         });
 
@@ -89,10 +89,6 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
         TextView developers_Actual_Name = (TextView) findViewById(R.id.actual_name);
         developers_Actual_Name.setText(devProfile.getDevelopersName());
 
-
-
-        TextView relativeLayout = (TextView) findViewById(R.id.username);
-        relativeLayout.setText(devProfile.getDevelopersName());
 
 
         ImageView dev_Image2 =(ImageView) findViewById(R.id.background_image);
@@ -155,7 +151,7 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
                     return null;
                 }
                 else{
-                    return DeveloperProfile.fetchProfilePageInfo(mUrl);
+                    return DevProfileUtil.fetchProfilePageInfo(mUrl);
                 }
             }
         };
@@ -207,7 +203,7 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
     private String check(String input){
 
         if (input.equals("null") ) {
-            return  "None Provided";
+            return "Not Provided";
         }
 
         else{return input;}
@@ -223,7 +219,11 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
             return  "Yes";
         }
 
-        else{return "No";}
+        if (isNull.equals("false")) {
+            return "No";
+        } else {
+            return isNull;
+        }
 
     }
 

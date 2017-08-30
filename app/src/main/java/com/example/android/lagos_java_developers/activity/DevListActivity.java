@@ -22,38 +22,46 @@ import android.widget.Toast;
 import com.example.android.lagos_java_developers.R;
 import com.example.android.lagos_java_developers.adapter.DevelopersAdapter;
 import com.example.android.lagos_java_developers.model.Developers;
-import com.example.android.lagos_java_developers.utils.DevelopersList;
+import com.example.android.lagos_java_developers.utils.DevListUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ListOfDevActivity extends AppCompatActivity implements DevelopersAdapter.ListItemClickListiner,SwipeRefreshLayout.OnRefreshListener {
+public class DevListActivity extends AppCompatActivity implements DevelopersAdapter.ListItemClickListiner, SwipeRefreshLayout.OnRefreshListener {
 
     //URL for GITHUB API
     private static final String GITHUB_SEARCH_API = "https://api.github.com/search/users?q=language:java+location:lagos&page=";
-
+    private static final int LOADER_ID = 0;
+    static int pageIndex = 1;
+    public String lagos_Github_Developers_Url;
     List<Developers> listOfDevelopers;
-    DevelopersAdapter createDevelopersAdapterObject;
+    DevelopersAdapter mAdapter;
     LinearLayoutManager linearLayoutManager;
-    RecyclerView createRecyclerViewobject;
+    RecyclerView mRecyclerView;
     int visibleItemCount;
     int totalItemCount;
     int firstVisibleItemPosition;
     int previousTotal = 0;
-    static int pageCount = 1;
-    private static final int LOADER_ID = 0;
     boolean isLoading = true;
-
     SwipeRefreshLayout swipeContainer;
-    public String lagos_Github_Developers_Url;
     LinearLayout loadMore;
     RelativeLayout noInternet;
     RelativeLayout loading;
     TextView emptyState;
+    String developerUsername;
+    String developerUrl;
 
-
-
+    public static boolean isNetworkStatusAvialable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo netInfos = connectivityManager.getActiveNetworkInfo();
+            if (netInfos != null)
+                if (netInfos.isConnected())
+                    return true;
+        }
+        return false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,35 +69,35 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
         setContentView(R.layout.rv_layout);
 
         //Dynamic Url for query
-        lagos_Github_Developers_Url = GITHUB_SEARCH_API + String.valueOf(pageCount);
+        lagos_Github_Developers_Url = GITHUB_SEARCH_API + String.valueOf(pageIndex);
 
 
-        createRecyclerViewobject = (RecyclerView) findViewById(R.id.rv_members);
+        mRecyclerView = (RecyclerView) findViewById(R.id.rv_members);
 
         listOfDevelopers = new ArrayList<>();
 
-        createDevelopersAdapterObject = new DevelopersAdapter(this, listOfDevelopers, this);
+        mAdapter = new DevelopersAdapter(this, listOfDevelopers, this);
 
 
         linearLayoutManager = new LinearLayoutManager(this);
-        createRecyclerViewobject.setLayoutManager(linearLayoutManager);
-        createRecyclerViewobject.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
 
-        createRecyclerViewobject.setAdapter(createDevelopersAdapterObject);
+        mRecyclerView.setAdapter(mAdapter);
 
-//        loadmore = (LinearLayout) findViewById(R.id.linlaFooterProgress);
+
         loading = (RelativeLayout) findViewById(R.id.loading);
 
-        //To display the message when there is nothing toi display
+        //To display the message when there is nothing to display
         emptyState = (TextView) findViewById(R.id.emptyState);
 
         //To display the message for no internet connection
         noInternet = (RelativeLayout) findViewById(R.id.noInternetConnection);
 
-//        spins to show that it is loading
+        //spins to show that it is loading
         loadMore = (LinearLayout)findViewById(R.id.footerPB);
 
-//        refreshes when pulled down
+        //refreshes when pulled down
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
 
 
@@ -103,7 +111,7 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
             noInternet.setVisibility(View.VISIBLE);
 
 
-            Snackbar.make(createRecyclerViewobject,
+            Snackbar.make(mRecyclerView,
                     "internet is not available", Snackbar.LENGTH_LONG)
                     .setAction("Retry", new View.OnClickListener() {
                         @Override
@@ -111,12 +119,12 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
                             // Custom action
                             loading.setVisibility(View.VISIBLE);
                             noInternet.setVisibility(View.GONE);
-                            getSupportLoaderManager().initLoader(LOADER_ID, null, new MyLoaer());
+                            getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
                         }
                     }).show();
         }
 
-        getSupportLoaderManager().initLoader(LOADER_ID, null, new MyLoaer());
+        getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
         swipeContainer.setOnRefreshListener(this);
 
 
@@ -131,8 +139,63 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
 
     }
 
+    @Override
+    public void onListItemClicked(int clickdItemIndex) {
+        Intent numbersIntent = new Intent(DevListActivity.this, DevProfileActivity.class);
+        developerUsername = mAdapter.getList().getDeveloperName();
+        developerUrl = mAdapter.getList().getDeveloperUrl();
+        String jsonLink = mAdapter.getList().getDevMainPage();
+        numbersIntent.putExtra("image", mAdapter.getList().getImageResourceId());
+        numbersIntent.putExtra("username", developerUsername);
+        numbersIntent.putExtra("devUrl", developerUrl);
+        numbersIntent.putExtra("devHtmlPage", jsonLink);
+        startActivity(numbersIntent);
 
-    class MyLoaer implements LoaderManager.LoaderCallbacks<List<Developers>>{
+    }
+
+    @Override
+    public void onRefresh() {
+
+        if (isNetworkStatusAvialable(getApplicationContext())) {
+            swipeContainer.setRefreshing(true);
+//            mAdapter.clear();
+            Toast.makeText(this, "Refreshing list....", Toast.LENGTH_LONG).show();
+
+            swipeContainer.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                    getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
+                    noInternet.setVisibility(View.GONE);
+                }
+            }, 3500);
+
+        } else {
+            Snackbar.make(mRecyclerView,
+                    "No connection", Snackbar.LENGTH_LONG)
+                    .setAction("Retry", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Custom action
+                            loading.setVisibility(View.VISIBLE);
+                            noInternet.setVisibility(View.GONE);
+                            getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
+                        }
+                    }).show();
+
+        }
+        //Disable the refreshing animation
+        swipeContainer.setRefreshing(false);
+    }
+
+    public void trigger(View view) {
+
+        loading.setVisibility(View.VISIBLE);
+        noInternet.setVisibility(View.GONE);
+        getSupportLoaderManager().initLoader(0, null, new OkLoader());
+    }
+
+    class OkLoader implements LoaderManager.LoaderCallbacks<List<Developers>> {
 
 
 
@@ -153,7 +216,7 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
             if(mUrl==null){
                 return null;
             }
-            return DevelopersList.fetchAllDevInfo(mUrl);
+            return DevListUtil.fetchAllDevInfo(mUrl);
 
         }
         };
@@ -162,17 +225,17 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Developers>> loader, List<Developers> developerss) {
+    public void onLoadFinished(Loader<List<Developers>> loader, List<Developers> developers) {
 
 
-        if( developerss !=null && ! developerss.isEmpty()){
-              createDevelopersAdapterObject.addAll( developerss );
+        if (developers != null && !developers.isEmpty()) {
+            mAdapter.addAll(developers);
             emptyState.setVisibility(View.GONE);
             loading.setVisibility(View.GONE);
             loadMore.setVisibility(View.GONE);
             noInternet.setVisibility(View.GONE);
 
-        createRecyclerViewobject.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
 
                 @Override
@@ -202,17 +265,17 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
                             }
                         }
                         if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount) {
-                            pageCount = pageCount +1;
-                            if  (pageCount < 8){
-                               lagos_Github_Developers_Url = GITHUB_SEARCH_API +String.valueOf(pageCount);
+                            pageIndex = pageIndex + 1;
+                            if (pageIndex < 8) {
+                                lagos_Github_Developers_Url = GITHUB_SEARCH_API + String.valueOf(pageIndex);
 
                         if (isNetworkStatusAvialable(getApplicationContext())){
                                 loadMore.setVisibility(View.VISIBLE);
-                                getSupportLoaderManager().initLoader( pageCount, null, new MyLoaer());
+                            getSupportLoaderManager().initLoader(pageIndex, null, new OkLoader());
                                 isLoading =true;}
 
                           else{
-                            Snackbar.make(createRecyclerViewobject,
+                            Snackbar.make(mRecyclerView,
                                     "internet is not available", Snackbar.LENGTH_LONG)
                                     .setAction("Retry", new View.OnClickListener() {
                                         @Override
@@ -220,7 +283,7 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
                                             // Custom action
                                             loading.setVisibility(View.VISIBLE);
                                             noInternet.setVisibility(View.GONE);
-                                            getSupportLoaderManager().initLoader(LOADER_ID, null, new MyLoaer());
+                                            getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
                                         }
                                     }).show();
                             loadMore.setVisibility(View.GONE);
@@ -229,7 +292,7 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
 
                         else{
 
-                                Snackbar.make(createRecyclerViewobject,
+                                Snackbar.make(mRecyclerView,
                                         "Nothing to show", Snackbar.LENGTH_LONG)
                                         .setAction("Cancel", new View.OnClickListener() {
                                             @Override
@@ -254,93 +317,17 @@ public class ListOfDevActivity extends AppCompatActivity implements DevelopersAd
 
     @Override
     public void onLoaderReset(Loader<List<Developers>> loader) {
-        createDevelopersAdapterObject.clear();
+        mAdapter.clear();
     }
   }
-      String developerUsername;
-   String developerUrl;
-      @Override
-   public void onListItemClicked(int clickdItemIndex) {
-        Intent numbersIntent = new Intent(ListOfDevActivity.this, DevProfileActivity.class);
-          developerUsername = createDevelopersAdapterObject.getList().getDeveloperName();
-            developerUrl = createDevelopersAdapterObject.getList().getDeveloperUrl();
-            String jsonLink = createDevelopersAdapterObject.getList().getDevMainPage();
-      numbersIntent.putExtra("image", createDevelopersAdapterObject.getList().getImageResourceId());
-           numbersIntent.putExtra("username",developerUsername);
-           numbersIntent.putExtra("devUrl",developerUrl);
-           numbersIntent.putExtra("devHtmlPage",jsonLink);
-           startActivity(numbersIntent);
-
-    }
-
-    @Override
-    public void onRefresh() {
-
-        if( isNetworkStatusAvialable (getApplicationContext())) {
-            swipeContainer.setRefreshing(true);
-            createDevelopersAdapterObject.clear();
-            Toast.makeText(this, "Refreshing list....", Toast.LENGTH_LONG).show();
-
-            swipeContainer.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-
-                    getSupportLoaderManager().initLoader(LOADER_ID, null, new MyLoaer());
-                    noInternet.setVisibility(View.GONE);
-                    swipeContainer.setRefreshing(false);
-                }
-            },3500);
-
-        }
-
-else {       Snackbar.make(createRecyclerViewobject,
-                "No connection", Snackbar.LENGTH_LONG)
-                .setAction("Retry", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Custom action
-                        loading.setVisibility(View.VISIBLE);
-                        noInternet.setVisibility(View.GONE);
-                        getSupportLoaderManager().initLoader(LOADER_ID, null, new MyLoaer());
-                    }
-                }).show();
-
-            }
-            //Disable the refreshing animation
-            swipeContainer.setRefreshing(false);
-        }
-
-
-
-
-
-
-            public static boolean isNetworkStatusAvialable (Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null)
-        {
-            NetworkInfo netInfos = connectivityManager.getActiveNetworkInfo();
-            if(netInfos != null)
-                if(netInfos.isConnected())
-                    return true;
-        }
-        return false;
-    }
-
-    public  void trigger (View view){
-
-            loading.setVisibility(View.VISIBLE);
-            noInternet.setVisibility(View.GONE);
-        getSupportLoaderManager().initLoader(0, null,new  MyLoaer());
-    }
 
 
 //    @Override
 //    protected void onDestroy() {
 //        super.onDestroy();
-//        if(createDevelopersAdapterObject != null) {
-//            pageCount = 1;
-//            this.unregisterReceiver(createDevelopersAdapterObject);
+//        if(mAdapter != null) {
+//            pageIndex = 1;
+//            this.unregisterReceiver(mAdapter);
 //        }
 //    }
 

@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="no_internet_connection">15dp</dimen>
+    <dimen name="no_internet_connection">15sp</dimen>
     <dimen name="Error_spacing">20dp</dimen>
+    <dimen name="view_layout_width">1dp</dimen>
+    <dimen name="view_layout_height">38dp</dimen>
+    <dimen name="view_layout_marginBotton">18dp</dimen>
+    <dimen name="view_layout_marginTop">10dp</dimen>
+    <dimen name="digit_display_text_size">20sp</dimen>
+    <dimen name="layout_margin_digit_display">15dp</dimen>
+    <dimen name="digit_text_size">20sp</dimen>
+    <dimen name="subtext_display">14sp</dimen>
+    <dimen name="other_margin">10dp</dimen>
 </resources>

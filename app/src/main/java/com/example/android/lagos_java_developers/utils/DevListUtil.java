@@ -20,12 +20,11 @@ import java.util.List;
  * parsing a JSON response.
  */
 
-public class DevelopersList {
+public class DevListUtil {
 
     /** Tag for the log messages */
-    private static final String LOG_TAG = DevelopersList.class.getSimpleName();
-
-
+    private static final String LOG_TAG = DevListUtil.class.getSimpleName();
+    static String image;
 
     /**
      * Helper methods related to requesting and receiving a user data from GitHub.
@@ -50,10 +49,6 @@ public class DevelopersList {
         // Return the extracted developers information
         return allDevInfo;
     }
-
-
-
-   static String image;
 
     private static List<Developers> extractAllDevInfo(String developerJSON) {
 
@@ -91,7 +86,7 @@ public class DevelopersList {
             return allJavaDevelopers;
 
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem parsing the earthquake JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing the developer JSON results", e);
         }
         return null;
     }
