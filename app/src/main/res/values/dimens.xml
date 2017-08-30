@@ -11,4 +11,5 @@
     <dimen name="digit_text_size">20sp</dimen>
     <dimen name="subtext_display">14sp</dimen>
     <dimen name="other_margin">10dp</dimen>
+    <dimen name="progress_bar_dimension">90dp</dimen>
 </resources>
