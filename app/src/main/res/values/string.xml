@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Java_Developers(Lagos)</string>
+    <string name="Default">Not Stated</string>
+    <string name="developers_name"> Name</string>
+    <string name="gist">Gist</string>
+    <string name="bio">Bio</string>
+    <string name="repos">Repos</string>
+    <string name="following">Following</string>
+    <string name="followers">Followers</string>
+    <string name="developers_location"> location</string>
+    <string name="developers_email"> Email</string>
+    <string name="developers_blog">Blog</string>
+    <string name="developers_company">Developers company</string>
+    <string name="share_message"> Check out this awesome developer </string>
+    <string name="browser_header">Complete action using</string>
+    <string name="share_header">Share via</string>
+</resources>
