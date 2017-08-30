@@ -57,7 +57,9 @@
             android:layout_gravity="center"
             android:text="@string/loading_contents"/>
     </RelativeLayout>
-    <RelativeLayout
+
+
+        <RelativeLayout
         android:id="@+id/noInternetConnection"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -88,7 +90,7 @@
 
             />
         <Button
-
+            android:id="@+id/try_again_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/try_again"
@@ -103,15 +105,39 @@
 
 
     </RelativeLayout>
-    <TextView
-        android:id="@+id/emptyState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center"
-        android:text="@string/no_data_to_display"
-        android:visibility="gone"
-        />
+
+
+        <RelativeLayout
+            android:id="@+id/emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#1000"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/error_message1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginBottom="@dimen/Error_spacing"
+                android:drawableTop="@drawable/avata"
+                android:gravity="center_horizontal"
+                android:text="@string/empty_state"
+                android:textSize="30sp"
+                />
+
+            <TextView
+                android:id="@+id/try_again1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/error_message1"
+                android:gravity="center_horizontal"
+                android:text="@string/instrustions_empty_state"
+                android:textSize="@dimen/no_internet_connection"
+
+                />
+
+        </RelativeLayout>
 
 
 

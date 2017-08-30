@@ -10,4 +10,6 @@
     <string name="not_stated">Not Stated</string>
     <string name="hireable">Hireable</string>
     <string name="loading_contents">Loading Contents.....</string>
+    <string name="instrustions_empty_state">Check your internet connection and swipe to Refresh</string>
+    <string name="empty_state">No data to display</string>
 </resources>

@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_marginLeft="90dp"
+            android:layout_marginStart="90dp"
             android:background="@color/faded_background"
             android:indeterminateOnly="true"
             />
@@ -130,8 +130,7 @@
                 android:minHeight="100dp"
                 android:scaleType="centerCrop"
                 app:layout_scrollFlags="scroll|enterAlwaysCollapsed"/>
-            <!--/> put the raw image the problem lies here  -->
-            android:background="@drawable/ok"
+
 
             <View
                 android:layout_width="match_parent"
@@ -238,11 +237,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
                 android:drawableLeft="@drawable/avata"
                 android:gravity="center"
                 android:onClick="website"
                 android:text="@string/website"
-                android:textColor="@color/links"/>
+                android:textColor="@color/links"
+                />
 
             <android.support.v7.widget.CardView
                 xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -481,7 +483,6 @@
     </android.support.v4.widget.NestedScrollView>
 
 
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
@@ -489,7 +490,7 @@
         android:layout_gravity="top|left"
         android:clickable="true"
         android:onClick="share"
-        app:backgroundTint="#717439"
+        app:backgroundTint="?android:attr/colorPressedHighlight"
         app:fabSize="normal"
         app:layout_anchor="@+id/nestedScrollView"
         app:layout_anchorGravity="bottom|right|center_vertical"

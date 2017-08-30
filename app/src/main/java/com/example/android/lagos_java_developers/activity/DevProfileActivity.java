@@ -94,13 +94,13 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
         ImageView dev_Image2 =(ImageView) findViewById(R.id.background_image);
         Picasso.with(this)
                 .load(getIntent().getStringExtra("image"))
-                .error(R.drawable.patterns_emptystates_do)
-                .placeholder(R.drawable.ok).into( dev_Image2);
+                .error(R.drawable.image_download_error)
+                .placeholder(R.drawable.ok1).into(dev_Image2);
 
         ImageView dev_Image =(ImageView) findViewById(R.id.app_bar_image);
         Picasso.with(this)
                 .load(getIntent().getStringExtra("image"))
-                        .error(R.drawable.patterns_emptystates_do)
+                .error(R.drawable.image_download_error)
                         .placeholder(R.drawable.avata).into( dev_Image);
 
 
