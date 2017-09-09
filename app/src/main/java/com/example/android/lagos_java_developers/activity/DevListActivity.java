@@ -1,9 +1,6 @@
 package com.example.android.lagos_java_developers.activity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
@@ -22,6 +19,7 @@ import com.example.android.lagos_java_developers.R;
 import com.example.android.lagos_java_developers.adapter.DevelopersAdapter;
 import com.example.android.lagos_java_developers.model.Developers;
 import com.example.android.lagos_java_developers.utils.DevListUtil;
+import com.example.android.lagos_java_developers.utils.NetworkCall;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,16 +50,6 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
     String developerUrl;
     Boolean loadingContents = true;
 
-    public static boolean isNetworkStatusAvialable(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkInfo netInfos = connectivityManager.getActiveNetworkInfo();
-            if (netInfos != null)
-                if (netInfos.isConnected())
-                    return true;
-        }
-        return false;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,19 +88,7 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
         //refreshes when pulled down
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
 
-
-        // Display data if internet connection is available else ask user to retry
-        Boolean netCheck = isNetworkStatusAvialable(getApplicationContext());
-        if (!netCheck) {
-
-            loading.setVisibility(View.GONE);
-            noInternet.setVisibility(View.VISIBLE);
-
-        }
-
-        getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
         swipeContainer.setOnRefreshListener(this);
-
 
         // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -120,7 +96,18 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
+        // Display data if internet connection is available else ask user to retry
+        Boolean netCheck = NetworkCall.isNetworkStatusAvialable(getApplicationContext());
+        if (!netCheck) {
 
+            loading.setVisibility(View.GONE);
+            noInternet.setVisibility(View.VISIBLE);
+
+
+        } else {
+
+            getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
+        }
     }
 
     @Override
@@ -140,17 +127,20 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
     @Override
     public void onRefresh() {
 
-        if (isNetworkStatusAvialable(getApplicationContext())) {
+        if (NetworkCall.isNetworkStatusAvialable(getApplicationContext())) {
+            mAdapter.clear();
             swipeContainer.setRefreshing(true);
-
+            noInternet.setVisibility(View.GONE);
             Toast.makeText(this, "Refreshing list....", Toast.LENGTH_LONG).show();
+
 
             swipeContainer.postDelayed(new Runnable() {
                 @Override
                 public void run() {
 
                     getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
-                    noInternet.setVisibility(View.GONE);
+
+
                 }
             }, 3500);
 
@@ -163,7 +153,6 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
                             // Custom action
                             loading.setVisibility(View.VISIBLE);
                             noInternet.setVisibility(View.GONE);
-                            emptyState.setVisibility(View.GONE);
                             getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
                         }
                     }).show();
@@ -174,10 +163,21 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
     }
 
     public void trigger(View view) {
-
+        getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
         loading.setVisibility(View.VISIBLE);
         noInternet.setVisibility(View.GONE);
-        getSupportLoaderManager().initLoader(0, null, new OkLoader());
+
+    }
+
+    public int getPageIndex() {
+        return pageIndex;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("SEARCH_RESULTS_RAW", getPageIndex());
+
     }
 
     class OkLoader implements LoaderManager.LoaderCallbacks<List<Developers>> {
@@ -190,9 +190,6 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
             return new AsyncTaskLoader<List<Developers>>(getApplicationContext()) {
 
                 public String mUrl = searchUrl;
-
-
-
 
 
 
@@ -219,9 +216,9 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
         public void onLoadFinished(Loader<List<Developers>> loader, List<Developers> developers) {
 
 
-            if (developers != null && !developers.isEmpty() && isNetworkStatusAvialable(getApplicationContext())) {
+            if (developers != null && !developers.isEmpty() && NetworkCall.isNetworkStatusAvialable(getApplicationContext())) {
                 mAdapter.addAll(developers);
-                emptyState.setVisibility(View.GONE);
+                mAdapter.notifyDataSetChanged();
                 loading.setVisibility(View.GONE);
                 loadMore.setVisibility(View.GONE);
                 noInternet.setVisibility(View.GONE);
@@ -256,34 +253,18 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
                                 }
                             }
                             if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount) {
-                                pageIndex = pageIndex + 1;
-                                if (pageIndex < 8) {
+                                pageIndex += 1;
+                                if (pageIndex <= 8 && NetworkCall.isNetworkStatusAvialable(getApplicationContext())) {
 
-                                    //saved instance
                                     searchUrl = GITHUB_SEARCH_API + String.valueOf(pageIndex);
 
-                                    if (isNetworkStatusAvialable(getApplicationContext())) {
                                         loadMore.setVisibility(View.VISIBLE);
                                         getSupportLoaderManager().initLoader(pageIndex, null, new OkLoader());
                                         isLoading = true;
                                     } else {
-                                        Snackbar.make(mRecyclerView,
-                                                "internet is not available", Snackbar.LENGTH_LONG)
-                                                .setAction("Retry", new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View v) {
-                                                        // Custom action
-                                                        loading.setVisibility(View.VISIBLE);
-                                                        noInternet.setVisibility(View.GONE);
-                                                        getSupportLoaderManager().initLoader(LOADER_ID, null, new OkLoader());
-                                                    }
-                                                }).show();
-                                        loadMore.setVisibility(View.GONE);
-                                    }
-                                } else {
 
                                     Snackbar.make(mRecyclerView,
-                                            "Nothing to show", Snackbar.LENGTH_LONG)
+                                            "End of List", Snackbar.LENGTH_LONG)
                                             .setAction("Cancel", new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {
@@ -301,10 +282,6 @@ public class DevListActivity extends AppCompatActivity implements DevelopersAdap
                     }
                 });
 
-
-            } else {
-                loading.setVisibility(View.GONE);
-                emptyState.setVisibility(View.VISIBLE);
 
             }
 

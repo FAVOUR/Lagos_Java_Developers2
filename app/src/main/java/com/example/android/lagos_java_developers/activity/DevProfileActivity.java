@@ -16,17 +16,20 @@ import android.widget.TextView;
 import com.example.android.lagos_java_developers.R;
 import com.example.android.lagos_java_developers.model.DevProfile;
 import com.example.android.lagos_java_developers.utils.DevProfileUtil;
+import com.example.android.lagos_java_developers.utils.NetworkCall;
 import com.squareup.picasso.Picasso;
 
 
 
 
 public class DevProfileActivity extends AppCompatActivity implements  LoaderManager.LoaderCallbacks<DevProfile> {
+    int loader_id = 0;
     private String devUrl;
     private String userName;
     private String htmlLink;
     private RelativeLayout loading;
     private RelativeLayout noInternet;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +43,7 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
 
-        if (DevListActivity.isNetworkStatusAvialable(getApplicationContext())) {
+        if (NetworkCall.isNetworkStatusAvialable(getApplicationContext())) {
 
             getSupportLoaderManager().initLoader(0, null, this);
 
@@ -52,10 +55,18 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
     }
 
     //activated when the user clicks the try again
-    public  void trigger (View view){
-        loading.setVisibility(View.VISIBLE);
-        noInternet.setVisibility(View.GONE);
-        getSupportLoaderManager().initLoader(0, null, this);
+    public void trigger(View view) {
+        if (!NetworkCall.isNetworkStatusAvialable(getApplicationContext())) {
+
+            noInternet.setVisibility(View.VISIBLE);
+            loading.setVisibility(View.GONE);
+
+        } else {
+            loading.setVisibility(View.VISIBLE);
+            noInternet.setVisibility(View.GONE);
+            getSupportLoaderManager().initLoader(loader_id, null, this);
+        }
+
     }
 
 
@@ -68,8 +79,8 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(userName);
-        getSupportActionBar().setSubtitle("common");
         toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material);
+//        NavUtils.navigateUpFromSameTask(this);
 
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -80,7 +91,7 @@ public class DevProfileActivity extends AppCompatActivity implements  LoaderMana
         });
 
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         TextView tUserName = (TextView)findViewById(R.id.devLink);
         tUserName.setText(htmlLink);

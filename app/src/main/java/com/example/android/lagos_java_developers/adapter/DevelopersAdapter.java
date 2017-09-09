@@ -70,47 +70,15 @@ public class DevelopersAdapter extends RecyclerView.Adapter<DevelopersAdapter.De
     public void addAll(List<Developers>Developers){
           mDevelopers.addAll(Developers);
         notifyDataSetChanged();
+
     }
 
     public  Developers getList(){
        return mDevelopers.get(clickedPosition);
     }
 
-    public void add(Developers mc) {
-        mDevelopers.add(mc);
-        notifyItemInserted(mDevelopers.size() - 1);
-    }
-
-    public void addLoadingFooter() {
-        isLoadingAdded = true;
-        add(new Developers("","","",""));
-    }
-
-    public void remove(Developers city) {
-        int position = mDevelopers.indexOf(city);
-        if (position > -1) {
-            mDevelopers.remove(position);
-            notifyItemRemoved(position);
-        }
-    }
-
-    public void removeLoadingFooter() {
-        isLoadingAdded = false;
-
-        int position = mDevelopers.size() - 1;
-        Developers item = getItem(position);
-
-        if (item != null) {
-            mDevelopers.remove(position);
-            notifyItemRemoved(position);
-        }
 
 
-    }
-
-    public Developers getItem(int position) {
-        return mDevelopers.get(position);
-    }
 
     public interface ListItemClickListiner {
         void onListItemClicked(int clickditemindex);

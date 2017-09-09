@@ -15,7 +15,9 @@
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp">
+        android:layout_margin="20dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        >
 
         <ImageView
             android:id="@+id/dev_image"
@@ -36,8 +38,6 @@
             android:layout_centerVertical="true"
             android:layout_marginTop="10dp"
             android:layout_toEndOf="@+id/dev_image"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
             android:textSize="18sp"
             android:textStyle="bold"
             tools:text="@string/developers_name"
